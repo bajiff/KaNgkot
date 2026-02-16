@@ -69,13 +69,4 @@ User: kamal / kamal123
 📝 Detail Teknis Deployment (PythonAnywhere)
 Proyek ini menggunakan standar WSGI. Pastikan path pada file WSGI PythonAnywhere diarahkan ke folder project dan menggunakan venv yang sesuai dengan versi Python (rekomendasi: 3.12).
 
-Dibuat oleh: [Kamal Erlambang] - [230511075]
-
-
----
-
-### Tips untuk Kamu:
-1. **Cara Membuat di GitHub:** Masuk ke repository kamu di GitHub, klik tombol **"Add file"** -> **"Create new file"**, beri nama `README.md`, lalu tempel kode di atas.
-2. **Screenshots:** Sangat disarankan untuk mengambil tangkapan layar (screenshot) halaman Login, Dashboard Admin, dan Dashboard User, lalu upload ke folder `screenshots` di GitHub agar orang bisa melihat tampilan aplikasinya tanpa harus menginstall.
-
-Laporan sudah oke, README sudah siap. Ada lagi yang bisa saya bantu untuk menyempurnakan tugas akhir kamu? Selamat ya, Kamal! 🎓🚀
+Dibuat oleh: [Baji Ajalah] - [230511093]
