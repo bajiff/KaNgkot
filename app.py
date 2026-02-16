@@ -29,8 +29,40 @@ def index():
 # --- 3. ROUTE AUTHENTICATION (Placeholder) ---
 @app.route('/login', methods=['POST'])
 def login():
-    # Logika login akan kita isi di Langkah 3
-    pass
+    # 1. Ambil data dari form HTML
+    username = request.form['username']
+    password = request.form['password']
+
+    # 2. Buka koneksi ke database
+    conn = get_db_connection()
+    if not conn:
+        flash('Gagal koneksi ke database!', 'error')
+        return redirect(url_for('index'))
+
+    # 3. Cek apakah user ada di database
+    cursor = conn.cursor(dictionary=True) # dictionary=True agar hasil query berupa Dict {'id': 1, ...}
+    
+    # Query aman dari SQL Injection
+    query = "SELECT * FROM users WHERE username = %s"
+    cursor.execute(query, (username,))
+    user = cursor.fetchone()
+
+    cursor.close()
+    conn.close()
+
+    # 4. Verifikasi Password (Sederhana dulu: String comparison)
+    # Catatan: Di production nanti WAJIB pakai hash (bcrypt/pbkdf2)
+    if user and user['password'] == password:
+        # Login Sukses: Simpan data penting di Session
+        session['user_id'] = user['id']
+        session['username'] = user['username']
+        session['role'] = user['role']
+        
+        return redirect(url_for('dashboard'))
+    else:
+        # Login Gagal
+        flash('Username atau Password salah!', 'error')
+        return redirect(url_for('index'))
 
 @app.route('/logout')
 def logout():
