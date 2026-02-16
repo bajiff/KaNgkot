@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="max-w-lg mx-auto bg-white p-8 rounded-lg shadow-md mt-10">
+    <h2 class="text-2xl font-bold text-gray-800 mb-6">
+        {% if angkot %} Edit Data Angkot {% else %} Tambah Angkot Baru {% endif %}
+    </h2>
+
+    <form method="POST">
+        <div class="mb-4">
+            <label class="block text-gray-700 font-bold mb-2">Plat Nomor</label>
+            <input type="text" name="plat_nomor" 
+                   value="{{ angkot['plat_nomor'] if angkot else '' }}"
+                   class="w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-300" 
+                   placeholder="Contoh: B 1234 CD" required>
+        </div>
+
+        <div class="mb-4">
+            <label class="block text-gray-700 font-bold mb-2">Jurusan</label>
+            <input type="text" name="jurusan" 
+                   value="{{ angkot['jurusan'] if angkot else '' }}"
+                   class="w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-300" 
+                   placeholder="Contoh: Cengkareng - Kota" required>
+        </div>
+
+        <div class="mb-4">
+            <label class="block text-gray-700 font-bold mb-2">Harga Sewa / Hari (Rp)</label>
+            <input type="number" name="harga_per_hari" 
+                   value="{{ angkot['harga_per_hari'] if angkot else '' }}"
+                   class="w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-300" 
+                   placeholder="Contoh: 150000" required>
+        </div>
+
+        <div class="mb-6">
+            <label class="block text-gray-700 font-bold mb-2">Status</label>
+            <select name="status" class="w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-300">
+                <option value="tersedia" {% if angkot and angkot['status'] == 'tersedia' %}selected{% endif %}>Tersedia</option>
+                <option value="disewa" {% if angkot and angkot['status'] == 'disewa' %}selected{% endif %}>Disewa</option>
+                <option value="perbaikan" {% if angkot and angkot['status'] == 'perbaikan' %}selected{% endif %}>Dalam Perbaikan</option>
+            </select>
+        </div>
+
+        <div class="flex justify-between">
+            <a href="{{ url_for('dashboard') }}" class="text-gray-500 hover:text-gray-700 py-2">Batal</a>
+            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded shadow">
+                {% if angkot %} Simpan Perubahan {% else %} Tambah Angkot {% endif %}
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}
