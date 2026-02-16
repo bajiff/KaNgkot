@@ -1,7 +1,6 @@
-
-from flask import Flask, render_template, request, redirect, url_for, session, flash
-import mysql.connector
 from db_config import get_db_connection
+from flask import Flask, render_template, request, redirect, url_for, session, flash
+import sqlite3
 
 app = Flask(__name__)
 
