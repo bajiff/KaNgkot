@@ -69,11 +69,26 @@ def logout():
     session.clear()
     return redirect(url_for('index'))
 
+# Route Dashboard
 @app.route('/dashboard')
 def dashboard():
+    # Cek Login
     if 'user_id' not in session:
         return redirect(url_for('index'))
-    return f"Halo, {session['username']}! (Role: {session['role']})"
+    
+    # Ambil data angkot dari Database
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    
+    # Ambil semua data angkot
+    cursor.execute("SELECT * FROM angkot")
+    data_angkot = cursor.fetchall()
+    
+    cursor.close()
+    conn.close()
+    
+    # Render template dengan membawa data 'angkots'
+    return render_template('dashboard.html', angkots=data_angkot)
 
 # --- MAIN BLOCK ---
 if __name__ == '__main__':
