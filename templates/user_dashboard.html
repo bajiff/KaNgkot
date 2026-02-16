@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="mb-6">
+        <h1 class="text-3xl font-bold text-gray-800">Halo, {{ session['username'] }}!</h1>
+        <p class="text-gray-600">Mau pergi ke mana hari ini? Silakan pilih angkot yang tersedia.</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for item in angkots %}
+        <div class="bg-white rounded-lg shadow-lg overflow-hidden border border-gray-200 hover:shadow-xl transition-shadow duration-300">
+            <div class="bg-blue-600 p-4">
+                <h3 class="text-xl font-bold text-white flex justify-between items-center">
+                    {{ item['plat_nomor'] }}
+                    <span class="text-sm bg-white text-blue-600 px-2 py-1 rounded-full uppercase">{{ item['status'] }}</span>
+                </h3>
+            </div>
+            
+            <div class="p-6">
+                <p class="text-gray-600 mb-2"><span class="font-bold">Jurusan:</span><br> {{ item['jurusan'] }}</p>
+                <p class="text-gray-800 text-2xl font-bold mb-4">Rp {{ "{:,.0f}".format(item['harga_per_hari']) }} <span class="text-sm font-normal text-gray-500">/ hari</span></p>
+                
+                {% if item['status'] == 'tersedia' %}
+                    <a href="{{ url_for('booking_angkot', id=item['id']) }}" class="block w-full text-center bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                        Booking Sekarang
+                    </a>
+                {% else %}
+                    <button disabled class="block w-full text-center bg-gray-300 text-gray-500 font-bold py-2 px-4 rounded cursor-not-allowed">
+                        Tidak Tersedia
+                    </button>
+                {% endif %}
+            </div>
+        </div>
+        {% else %}
+            <p class="text-center col-span-3 text-gray-500 py-10">Belum ada angkot yang terdaftar saat ini.</p>
+        {% endfor %}
+    </div>
+{% endblock %}

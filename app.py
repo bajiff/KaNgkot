@@ -72,26 +72,28 @@ def logout():
 # Route Dashboard
 @app.route('/dashboard')
 def dashboard():
-    # Cek Login
+    # 1. Cek Login
     if 'user_id' not in session:
         return redirect(url_for('index'))
     
-    # Ambil data angkot dari Database
+    # 2. Ambil data angkot
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
-    
-    # Ambil semua data angkot
     cursor.execute("SELECT * FROM angkot")
     data_angkot = cursor.fetchall()
-    
     cursor.close()
     conn.close()
     
-    # Render template dengan membawa data 'angkots'
-    return render_template('dashboard.html', angkots=data_angkot)
+    # 3. Logika Pemisahan File Template
+    # Jika Admin, render file admin_dashboard.html
+    if session['role'] == 'admin':
+        return render_template('admin_dashboard.html', angkots=data_angkot)
+    
+    # Jika User, render file user_dashboard.html
+    else:
+        return render_template('user_dashboard.html', angkots=data_angkot)
 
 # --- ROUTE CRUD ANGKOT (ADMIN ONLY) ---
-
 @app.route('/angkot/tambah', methods=['GET', 'POST'])
 def tambah_angkot():
     # Keamanan: Hanya Admin yang boleh akses
