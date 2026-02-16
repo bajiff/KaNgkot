@@ -1,3 +1,4 @@
+
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 import mysql.connector
 from db_config import get_db_connection
@@ -40,10 +41,10 @@ def login():
         return redirect(url_for('index'))
 
     # 3. Cek apakah user ada di database
-    cursor = conn.cursor(dictionary=True) # dictionary=True agar hasil query berupa Dict {'id': 1, ...}
+    cursor = conn.cursor() # dictionary=True agar hasil query berupa Dict {'id': 1, ...}
     
     # Query aman dari SQL Injection
-    query = "SELECT * FROM users WHERE username = %s"
+    query = "SELECT * FROM users WHERE username = ?"
     cursor.execute(query, (username,))
     user = cursor.fetchone()
 
@@ -82,7 +83,7 @@ def register():
         cursor = conn.cursor()
         try:
             # Role default otomatis 'user'
-            query = "INSERT INTO users (username, password, role) VALUES (%s, %s, 'user')"
+            query = "INSERT INTO users (username, password, role) VALUES (?, ?, 'user')"
             cursor.execute(query, (username, password))
             conn.commit()
             
@@ -115,7 +116,7 @@ def dashboard():
     
     # 2. Ambil data angkot
     conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor()
     cursor.execute("SELECT * FROM angkot")
     data_angkot = cursor.fetchall()
     cursor.close()
@@ -147,7 +148,7 @@ def tambah_angkot():
         conn = get_db_connection()
         cursor = conn.cursor()
         try:
-            query = "INSERT INTO angkot (plat_nomor, jurusan, harga_per_hari, status) VALUES (%s, %s, %s, %s)"
+            query = "INSERT INTO angkot (plat_nomor, jurusan, harga_per_hari, status) VALUES (?, ?, ?, ?)"
             cursor.execute(query, (plat_nomor, jurusan, harga, status))
             conn.commit()
             flash('Angkot berhasil ditambahkan!', 'success')
@@ -167,7 +168,7 @@ def edit_angkot(id):
         return redirect(url_for('dashboard'))
 
     conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor()
 
     if request.method == 'POST':
         plat_nomor = request.form['plat_nomor']
@@ -176,7 +177,7 @@ def edit_angkot(id):
         status = request.form['status']
 
         try:
-            query = "UPDATE angkot SET plat_nomor=%s, jurusan=%s, harga_per_hari=%s, status=%s WHERE id=%s"
+            query = "UPDATE angkot SET plat_nomor=?, jurusan=?, harga_per_hari=?, status=? WHERE id=?"
             cursor.execute(query, (plat_nomor, jurusan, harga, status, id))
             conn.commit()
             flash('Data angkot berhasil diperbarui!', 'success')
@@ -185,7 +186,7 @@ def edit_angkot(id):
             flash(f'Gagal update data: {err}', 'error')
 
     # Jika GET, ambil data lama untuk ditampilkan di form
-    cursor.execute("SELECT * FROM angkot WHERE id = %s", (id,))
+    cursor.execute("SELECT * FROM angkot WHERE id = ?", (id,))
     angkot = cursor.fetchone()
     cursor.close()
     conn.close()
@@ -200,7 +201,7 @@ def hapus_angkot(id):
     conn = get_db_connection()
     cursor = conn.cursor()
     try:
-        cursor.execute("DELETE FROM angkot WHERE id = %s", (id,))
+        cursor.execute("DELETE FROM angkot WHERE id = ?", (id,))
         conn.commit()
         flash('Angkot berhasil dihapus.', 'success')
     except mysql.connector.Error as err:
@@ -220,10 +221,10 @@ def booking_angkot(id):
         return redirect(url_for('index'))
 
     conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor()
 
     # 2. Ambil data angkot
-    cursor.execute("SELECT * FROM angkot WHERE id = %s", (id,))
+    cursor.execute("SELECT * FROM angkot WHERE id = ?", (id,))
     angkot = cursor.fetchone()
 
     # 3. Proses Booking
@@ -233,11 +234,11 @@ def booking_angkot(id):
         
         try:
             # Simpan ke tabel bookings
-            query_booking = "INSERT INTO bookings (user_id, angkot_id, tanggal_sewa, status_booking) VALUES (%s, %s, %s, 'pending')"
+            query_booking = "INSERT INTO bookings (user_id, angkot_id, tanggal_sewa, status_booking) VALUES (?, ?, ?, 'pending')"
             cursor.execute(query_booking, (user_id, id, tanggal))
             
             # Update status angkot jadi 'disewa'
-            query_update = "UPDATE angkot SET status = 'disewa' WHERE id = %s"
+            query_update = "UPDATE angkot SET status = 'disewa' WHERE id = ?"
             cursor.execute(query_update, (id,))
             
             conn.commit()
