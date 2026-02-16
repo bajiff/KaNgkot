@@ -1,33 +1,17 @@
-import mysql.connector
+import sqlite3
+import os
 
-# --- PENGATURAN ENVIRONMENT ---
-# Ubah ke False saat kode ini sudah di-upload ke PythonAnywhere
-IS_LOCAL = True 
+# Database akan disimpan sebagai file di folder yang sama dengan app.py
+DB_NAME = 'kangkot.db'
 
 def get_db_connection():
-    config = {}
-
-    if IS_LOCAL:
-        # Konfigurasi Database LOKAL (XAMPP/MAMP/Lainnya)
-        config = {
-            'host': 'localhost',
-            'user': 'root',      # Default XAMPP biasanya 'root'
-            'password': 'rVzSgBU0L!Q1KZ7/',
-            'database': 'db_angkot'
-        }
-    else:
-        # Konfigurasi Database PYTHONANYWHERE
-        # Nanti Anda isi ini setelah membuat DB di dashboard PythonAnywhere
-        config = {
-            'host': 'namauser.mysql.pythonanywhere-services.com',
-            'user': 'namauser',
-            'password': 'password_db_anda',
-            'database': 'namauser$db_angkot'
-        }
-
-    try:
-        conn = mysql.connector.connect(**config)
-        return conn
-    except mysql.connector.Error as err:
-        print(f"Error: {err}")
-        return None
+    # Menggunakan path absolut agar aman di server
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    db_path = os.path.join(base_dir, DB_NAME)
+    
+    conn = sqlite3.connect(db_path)
+    
+    # PENTING: Agar hasil query bisa diakses seperti Dictionary (item['nama'])
+    conn.row_factory = sqlite3.Row
+    
+    return conn
