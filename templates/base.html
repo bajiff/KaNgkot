@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KaNgkot - Sistem Sewa Angkot</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 flex flex-col min-h-screen">
+
+    <nav class="bg-blue-600 p-4 text-white shadow-lg">
+        <div class="container mx-auto flex justify-between items-center">
+            <a href="{{ url_for('dashboard') }}" class="font-bold text-xl tracking-wider">🚌 KaNgkot</a>
+            
+            <div>
+                {% if session.get('username') %}
+                    <span class="mr-4">Halo, {{ session['username'] }} ({{ session['role'] }})</span>
+                    <a href="{{ url_for('logout') }}" class="bg-red-500 hover:bg-red-700 px-3 py-1 rounded text-sm transition">Logout</a>
+                {% else %}
+                    <a href="{{ url_for('index') }}" class="hover:underline">Login</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <main class="container mx-auto p-6 flex-grow">
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="mb-4">
+                {% for message in messages %}
+                    <div class="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 mb-2" role="alert">
+                        <p>{{ message }}</p>
+                    </div>
+                {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="bg-gray-800 text-white text-center p-4 mt-8">
+        <p>&copy; 2024 KaNgkot System. Built with Flask & Tailwind.</p>
+    </footer>
+
+</body>
+</html>
