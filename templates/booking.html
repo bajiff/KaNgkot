@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="max-w-md mx-auto bg-white p-8 rounded-lg shadow-md mt-10">
+    <h2 class="text-2xl font-bold text-gray-800 mb-2">Konfirmasi Booking</h2>
+    
+    <div class="bg-blue-50 p-4 rounded mb-6 border-l-4 border-blue-500">
+        <h3 class="text-xl font-bold text-blue-800">{{ angkot['plat_nomor'] }}</h3>
+        <p class="text-gray-700"><strong>Jurusan:</strong> {{ angkot['jurusan'] }}</p>
+        <p class="text-gray-700"><strong>Harga:</strong> Rp {{ "{:,.0f}".format(angkot['harga_per_hari']) }} / hari</p>
+    </div>
+
+    <form method="POST">
+        <div class="mb-6">
+            <label class="block text-gray-700 font-bold mb-2">Pilih Tanggal Sewa</label>
+            <input type="date" name="tanggal_sewa" required
+                   class="w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-300 shadow-sm">
+            <p class="text-xs text-gray-500 mt-2">*Sistem saat ini hanya melayani sewa harian (1 hari).</p>
+        </div>
+
+        <div class="flex justify-between items-center">
+            <a href="{{ url_for('dashboard') }}" class="text-gray-500 hover:text-gray-700 font-medium transition">
+                &larr; Batal
+            </a>
+            <button type="submit" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded shadow-lg transform hover:-translate-y-0.5 transition">
+                Konfirmasi & Bayar
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

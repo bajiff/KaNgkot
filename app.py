@@ -64,6 +64,43 @@ def login():
         flash('Username atau Password salah!', 'error')
         return redirect(url_for('index'))
 
+# --- ROUTE REGISTER (PENUMPANG BARU) ---
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    # Jika user submit form (POST)
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        confirm = request.form['confirm_password']
+
+        # Validasi Password
+        if password != confirm:
+            flash('Password tidak sama!', 'error')
+            return redirect(url_for('register'))
+
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        try:
+            # Role default otomatis 'user'
+            query = "INSERT INTO users (username, password, role) VALUES (%s, %s, 'user')"
+            cursor.execute(query, (username, password))
+            conn.commit()
+            
+            flash('Registrasi berhasil! Silakan login.', 'success')
+            return redirect(url_for('index')) # Kembali ke login
+            
+        except mysql.connector.IntegrityError:
+            # Error jika username sudah ada
+            flash('Username sudah digunakan! Cari nama lain.', 'error')
+        except Exception as e:
+            flash(f'Error: {e}', 'error')
+        finally:
+            cursor.close()
+            conn.close()
+
+    # Jika user baru buka halaman (GET)
+    return render_template('register.html')
+
 @app.route('/logout')
 def logout():
     session.clear()
@@ -173,6 +210,50 @@ def hapus_angkot(id):
         conn.close()
     
     return redirect(url_for('dashboard'))
+
+# --- ROUTE BOOKING (WAJIB ADA AGAR TIDAK ERROR) ---
+@app.route('/booking/<int:id>', methods=['GET', 'POST'])
+def booking_angkot(id):
+    # 1. Cek Login
+    if 'user_id' not in session:
+        flash('Silakan login untuk booking.', 'error')
+        return redirect(url_for('index'))
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    # 2. Ambil data angkot
+    cursor.execute("SELECT * FROM angkot WHERE id = %s", (id,))
+    angkot = cursor.fetchone()
+
+    # 3. Proses Booking
+    if request.method == 'POST':
+        tanggal = request.form['tanggal_sewa']
+        user_id = session['user_id']
+        
+        try:
+            # Simpan ke tabel bookings
+            query_booking = "INSERT INTO bookings (user_id, angkot_id, tanggal_sewa, status_booking) VALUES (%s, %s, %s, 'pending')"
+            cursor.execute(query_booking, (user_id, id, tanggal))
+            
+            # Update status angkot jadi 'disewa'
+            query_update = "UPDATE angkot SET status = 'disewa' WHERE id = %s"
+            cursor.execute(query_update, (id,))
+            
+            conn.commit()
+            flash('Booking berhasil! Menunggu konfirmasi admin.', 'success')
+            return redirect(url_for('dashboard'))
+            
+        except mysql.connector.Error as err:
+            flash(f'Gagal booking: {err}', 'error')
+        finally:
+            cursor.close()
+            conn.close()
+            
+    # Jika GET, tampilkan halaman konfirmasi
+    cursor.close()
+    conn.close()
+    return render_template('booking.html', angkot=angkot)
 
 # --- MAIN BLOCK ---
 if __name__ == '__main__':
