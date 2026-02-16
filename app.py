@@ -90,6 +90,88 @@ def dashboard():
     # Render template dengan membawa data 'angkots'
     return render_template('dashboard.html', angkots=data_angkot)
 
+# --- ROUTE CRUD ANGKOT (ADMIN ONLY) ---
+
+@app.route('/angkot/tambah', methods=['GET', 'POST'])
+def tambah_angkot():
+    # Keamanan: Hanya Admin yang boleh akses
+    if 'user_id' not in session or session.get('role') != 'admin':
+        flash('Akses ditolak!', 'error')
+        return redirect(url_for('dashboard'))
+
+    if request.method == 'POST':
+        plat_nomor = request.form['plat_nomor']
+        jurusan = request.form['jurusan']
+        harga = request.form['harga_per_hari']
+        status = request.form['status']
+
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        try:
+            query = "INSERT INTO angkot (plat_nomor, jurusan, harga_per_hari, status) VALUES (%s, %s, %s, %s)"
+            cursor.execute(query, (plat_nomor, jurusan, harga, status))
+            conn.commit()
+            flash('Angkot berhasil ditambahkan!', 'success')
+            return redirect(url_for('dashboard'))
+        except mysql.connector.Error as err:
+            flash(f'Gagal menambah data: {err}', 'error')
+        finally:
+            cursor.close()
+            conn.close()
+
+    # Jika GET, tampilkan form kosong
+    return render_template('form_angkot.html', angkot=None)
+
+@app.route('/angkot/edit/<int:id>', methods=['GET', 'POST'])
+def edit_angkot(id):
+    if 'user_id' not in session or session.get('role') != 'admin':
+        return redirect(url_for('dashboard'))
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    if request.method == 'POST':
+        plat_nomor = request.form['plat_nomor']
+        jurusan = request.form['jurusan']
+        harga = request.form['harga_per_hari']
+        status = request.form['status']
+
+        try:
+            query = "UPDATE angkot SET plat_nomor=%s, jurusan=%s, harga_per_hari=%s, status=%s WHERE id=%s"
+            cursor.execute(query, (plat_nomor, jurusan, harga, status, id))
+            conn.commit()
+            flash('Data angkot berhasil diperbarui!', 'success')
+            return redirect(url_for('dashboard'))
+        except mysql.connector.Error as err:
+            flash(f'Gagal update data: {err}', 'error')
+
+    # Jika GET, ambil data lama untuk ditampilkan di form
+    cursor.execute("SELECT * FROM angkot WHERE id = %s", (id,))
+    angkot = cursor.fetchone()
+    cursor.close()
+    conn.close()
+
+    return render_template('form_angkot.html', angkot=angkot)
+
+@app.route('/angkot/hapus/<int:id>')
+def hapus_angkot(id):
+    if 'user_id' not in session or session.get('role') != 'admin':
+        return redirect(url_for('dashboard'))
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("DELETE FROM angkot WHERE id = %s", (id,))
+        conn.commit()
+        flash('Angkot berhasil dihapus.', 'success')
+    except mysql.connector.Error as err:
+        flash(f'Gagal menghapus: {err}', 'error')
+    finally:
+        cursor.close()
+        conn.close()
+    
+    return redirect(url_for('dashboard'))
+
 # --- MAIN BLOCK ---
 if __name__ == '__main__':
     # Debug=True mempermudah kita melihat error saat development
